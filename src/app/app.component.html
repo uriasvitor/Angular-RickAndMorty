@@ -48,5 +48,8 @@
       <p class="err">Not found any Cards</p>
     }
 
+    @if(nextPage){
+        <div class="next" (click)="handlerPagination($event)">See more +</div>
+    }
   </div>
 </div>

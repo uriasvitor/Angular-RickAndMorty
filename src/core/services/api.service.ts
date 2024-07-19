@@ -14,4 +14,8 @@ export class ApiService {
     return this.http.get<characters>(environment.API_URL)
   }
 
+
+  getCharactersByPage(page:string):Observable<characters>{
+    return this.http.get<characters>(page)
+  }
 }

@@ -1,6 +1,7 @@
-import {Component, inject, OnInit} from '@angular/core';
+import { character } from './../mock/character.mock';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Subscription} from 'rxjs';
 import {startWith, map} from 'rxjs/operators';
 import {AsyncPipe, CommonModule} from '@angular/common';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
@@ -17,33 +18,40 @@ import { characters } from '../core/models/character.model';
   styleUrl: './app.component.scss'
 })
 
-export class AppComponent {
-  error = false;
+export class AppComponent implements OnDestroy {
+
   control = new FormControl('');
   characters: characters[] = [];
+  error = false;
+  nextPage = ''
   filtredCharacters = new BehaviorSubject<any[]>([]);
 
   private readonly apiService = inject(ApiService);
-
+  private readonly subscriptions = new Subscription();
 
   ngOnInit() {
     this.getCharacters();
 
-    this.control.valueChanges.pipe(
+    const controlSubscription = this.control.valueChanges.pipe(
       startWith(''),
       map(value => this.filterCards(value || ''))
     ).subscribe(filtered => this.filtredCharacters.next(filtered));
+
+
+    this.subscriptions.add(controlSubscription);
+
   }
 
   getCharacters(){
     this.apiService.getAllCharacters().subscribe({
       next:(value)=>{
+        this.nextPage = value.info.next;
         this.characters = value.results;
         this.filtredCharacters.next(this.characters);
       },
       error:err=>{
         this.error = true;
-        throw new err("an error occurred", err)
+        throw new err("An error occurred", err)
       }
 
     })
@@ -60,5 +68,32 @@ export class AppComponent {
     });
   }
 
+  handlerPagination(e:Event){
+    if(!e){
+      return console.error("Not a event")
+    }
+
+    if(!this.nextPage){
+      return console.log("Next page not found", this.nextPage)
+    }
+    const paginationSubscription = this.apiService.getCharactersByPage(this.nextPage).subscribe({
+      next:(value) =>{
+        this.nextPage = value.info.next;
+        this.characters = [...this.characters, ...value.results];
+        this.filtredCharacters.next(this.characters);
+      },
+      error:(err) =>{
+          this.error = true;
+          throw new err("An error occurred", err)
+      },
+    })
+
+    this.subscriptions.add(paginationSubscription)
+    console.log(this.nextPage)
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe()
+  }
 
 }

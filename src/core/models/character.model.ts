@@ -1,4 +1,5 @@
 export type characters = {
+  info: any;
   name:string,
   gender:string,
   episode:string[],
