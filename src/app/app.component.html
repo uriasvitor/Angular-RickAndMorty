@@ -8,7 +8,9 @@
            aria-label="Number"
            matInput
            [formControl]="control"
-           [matAutocomplete]="auto">
+           [matAutocomplete]="auto"
+           id="search"
+           >
 
       <mat-autocomplete #auto="matAutocomplete">
         @for (charactersNames of filtredCharacters | async; track
@@ -19,8 +21,9 @@
     </mat-form-field>
     </form>
 
-    @for (characterCard of filtredCharacters | async; track characterCard){
+
     <section class="cards">
+    @for (characterCard of filtredCharacters | async; track characterCard){
       <mat-card appearance="outlined">
         <mat-card-content>
           <div class="card">
@@ -38,8 +41,8 @@
           </div>
         </mat-card-content>
       </mat-card>
-    </section>
     }
+  </section>
 
     @if (error){
       <p class="err">Not found any Cards</p>

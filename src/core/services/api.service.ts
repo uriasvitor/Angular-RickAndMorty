@@ -13,4 +13,5 @@ export class ApiService {
   getAllCharacters():Observable<characters>{
     return this.http.get<characters>(environment.API_URL)
   }
+
 }
